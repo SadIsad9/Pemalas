@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masukkan Link Ujian</title>
+  <style>
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #fdfbfb, #ebedee);
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .box {
+      background: white;
+      padding: 30px 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+      animation: fadeInUp 1s ease-in-out;
+    }
+
+    h2 {
+      margin-top: 10px;
+    }
+
+    .warning {
+      color: red;
+      font-weight: bold;
+      animation: fadeInUp 1.3s ease forwards;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      margin: 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: box-shadow 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      box-shadow: 0 0 5px #28a745;
+      border-color: #28a745;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      transition: background 0.3s ease, transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+      transform: scale(1.03);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+      opacity: 0;
+      animation: fadeInUp 1.6s ease forwards;
+      animation-delay: 0.5s;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2 class="warning">Peringatan!!!</h2>
+    <h2 class="warning">Jangan lupa setelah masuk, klik icon plus agar memasuki mode fullscreen</h2>
+    <h2 class="warning">Hati-hati sama guru killer, ketauan mampus lu</h2>
+    <h2>Masukkan Link Ujian</h2>
+    <input type="text" id="linkInput" placeholder="https://docs.google.com/...">
+    <button onclick="goToExambro()">Masuk</button>
+    <h2 class="warning">Menuju Indonesia (c) Emas</h2>
+  </div>
+
+  <footer>© 2025 irsad_hytam</footer>
+
+  <script>
+    function goToExambro() {
+      const link = document.getElementById("linkInput").value;
+      if (link.trim() !== "") {
+        localStorage.setItem("ujianLink", link);
+        window.location.href = "ujian.html";
+      } else {
+        alert("Masukkan link terlebih dahulu!");
+      }
+    }
+  </script>
+</body>
+</html>
