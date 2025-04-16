@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ujian Exambro</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #000;
+      color: white;
+      font-family: sans-serif;
+    }
+
+    .header {
+      height: 50px;
+      background-color: #21c065;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      font-weight: bold;
+      font-size: 16px;
+      color: white;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .signal-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 1px;
+      height: 15px;
+    }
+
+    .signal-bar {
+      width: 2px;
+      background: white;
+      border-radius: 1px;
+      opacity: 0.5;
+    }
+
+    .signal-bar.active {
+      opacity: 1;
+    }
+
+    .signal-bar:nth-child(1) { height: 4px; }
+    .signal-bar:nth-child(2) { height: 7px; }
+    .signal-bar:nth-child(3) { height: 10px; }
+    .signal-bar:nth-child(4) { height: 13px; }
+
+    .battery {
+      width: 20px;
+      height: 10px;
+      border: 1px solid white;
+      position: relative;
+      background-color: white;
+    }
+
+    .battery::after {
+      content: '';
+      width: 3px;
+      height: 4px;
+      background: white;
+      position: absolute;
+      right: -4px;
+      top: 3px;
+    }
+
+    .menu-icon {
+      font-size: 20px;
+      user-select: none;
+      cursor: default;
+      margin-left: 5px;
+    }
+
+    iframe {
+      width: 100%;
+      height: calc(100% - 100px);
+      border: none;
+    }
+
+    .footer {
+      background: linear-gradient(to right, #7de3bd, #21c065);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 50px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .fullscreen-btn {
+      position: fixed;
+      bottom: 70px;
+      right: 15px;
+      width: 35px;
+      height: 35px;
+      background-color: #21c065;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 9999;
+    }
+
+    .custom-alert {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      width: 80%;
+      max-width: 300px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      z-index: 9999;
+    }
+
+    .custom-alert h3 {
+      margin-top: 0;
+    }
+
+    .custom-alert button {
+      margin: 10px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-no {
+      background-color: #ccc;
+      color: black;
+    }
+
+    .btn-yes {
+      background-color: #21c065;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>Exambro</div>
+    <div class="status-bar">
+      <div class="signal-bars">
+        <div class="signal-bar active"></div>
+        <div class="signal-bar active"></div>
+        <div class="signal-bar active"></div>
+        <div class="signal-bar active"></div>
+      </div>
+      <div class="battery"></div>
+      <div id="jam">00:00</div>
+      <div id="tanggal">--/--</div>
+      <div class="menu-icon">⋮</div>
+    </div>
+  </div>
+
+  <iframe id="ujianFrame"></iframe>
+
+  <div class="footer">
+    <div>BACK</div>
+    <div onclick="showExitAlert()">EXIT</div>
+    <div>FORWARD</div>
+  </div>
+
+  <div class="fullscreen-btn" onclick="toggleFullScreen()">+</div>
+
+  <!-- Custom Alert -->
+  <div id="customAlert" class="custom-alert" style="display:none;">
+    <h3>Peringatan</h3>
+    <p>Apakah anda yakin keluar dari aplikasi?</p>
+    <button class="btn-no" onclick="closeAlert()">Tidak</button>
+    <button class="btn-yes" onclick="exitApp()">Iya</button>
+  </div>
+
+  <script>
+    // Load link iframe
+    const link = localStorage.getItem("ujianLink");
+    if (link) {
+      document.getElementById("ujianFrame").src = link;
+    } else {
+      alert("Tidak ada link ditemukan. Kembali ke halaman awal.");
+      window.location.href = "index.html";
+    }
+
+    // Waktu & Tanggal
+    function updateWaktu() {
+      const now = new Date();
+      const jam = now.getHours().toString().padStart(2, '0');
+      const menit = now.getMinutes().toString().padStart(2, '0');
+      const tanggal = now.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit'
+      });
+
+      document.getElementById("jam").textContent = `${jam}:${menit}`;
+      document.getElementById("tanggal").textContent = tanggal;
+    }
+
+    setInterval(updateWaktu, 1000);
+    updateWaktu();
+
+    // Fullscreen
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch((err) => {
+          console.error(`Gagal masuk fullscreen: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Alert Custom
+    function showExitAlert() {
+      document.getElementById("customAlert").style.display = "block";
+    }
+
+    function closeAlert() {
+      document.getElementById("customAlert").style.display = "none";
+    }
+
+    function exitApp() {
+      window.location.href = "exit.html"; // Halaman kosong atau black screen
+    }
+  </script>
+</body>
+</html>
