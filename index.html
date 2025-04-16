@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masukkan Link Ujian</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #f1f1f1;
+    }
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2 style="color:red;">peringatan!!!</h2>
+    <h2 style="color:red;"> jangan lupa setelah masuk, klik icon plus agar memasuki mode fullscren</h2>
+    <h2 style="color:red;">hati" sama guru killer, ketauan mampus lu</h2>
+    <h2>Masukkan Link Ujian</h2>
+    <input type="text" id="linkInput" placeholder="https://docs.google.com/...">
+    <button onclick="goToExambro()">Masuk</button>
+  </div>
+
+  <script>
+    function goToExambro() {
+      const link = document.getElementById("linkInput").value;
+      if (link.trim() !== "") {
+        localStorage.setItem("ujianLink", link);
+        window.location.href = "ujian.html";
+      } else {
+        alert("Masukkan link terlebih dahulu!");
+      }
+    }
+  </script>
+</body>
+</html>
