@@ -81,6 +81,13 @@
     ol {
       margin-left: 20px;
     }
+
+    #reader {
+      margin-top: 20px;
+      display: none;
+      width: 100%;
+      max-width: 500px;
+    }
   </style>
 </head>
 <body>
@@ -88,10 +95,10 @@
   <div class="container">
     <div class="card">
       <h2>Masukkan IP address/alamat server</h2>
-      <input type="text" placeholder="Contoh: 192.168.1.1" />
-      <button>LANJUTKAN</button>
-      <button>SCAN QR CODE ALAMAT SERVER</button>
-      <button>SCAN QR CODE DARI GALLERY</button>
+      <input type="text" id="ipInput" placeholder="Contoh: 192.168.1.1" />
+      <button id="btnLanjut">LANJUTKAN</button>
+      <button id="btnScan">SCAN QR CODE ALAMAT SERVER</button>
+      <button id="btnGallery">SCAN QR CODE DARI GALLERY</button>
 
       <div class="note">
         <p><strong>Petunjuk:</strong></p>
@@ -101,7 +108,49 @@
         </ol>
       </div>
     </div>
+
+    <div id="reader"></div>
   </div>
 
+  <!-- QR Code scanner -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script>
+    const btnScan = document.getElementById('btnScan');
+    const readerDiv = document.getElementById('reader');
+    const ipInput = document.getElementById('ipInput');
+
+    btnScan.addEventListener('click', () => {
+      readerDiv.style.display = "block";
+
+      const html5QrCode = new Html5Qrcode("reader");
+
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+          const cameraId = devices[0].id;
+
+          html5QrCode.start(
+            cameraId,
+            {
+              fps: 10,
+              qrbox: 250
+            },
+            qrCodeMessage => {
+              alert(`QR Code terdeteksi: ${qrCodeMessage}`);
+              ipInput.value = qrCodeMessage;
+              html5QrCode.stop();
+              readerDiv.style.display = "none";
+            },
+            errorMessage => {
+              console.warn(errorMessage);
+            }
+          ).catch(err => {
+            console.error("Gagal mulai scanner: ", err);
+          });
+        }
+      }).catch(err => {
+        console.error("Tidak bisa mendeteksi kamera: ", err);
+      });
+    });
+  </script>
 </body>
 </html>
