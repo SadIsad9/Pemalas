@@ -214,6 +214,44 @@
       transform: scale(1.1);
     }
   }
+  
+  .send-message-btn {
+  position: fixed;
+  bottom: 70px;
+  right: 65px; /* Mengatur posisi tombol kirim pesan lebih dekat dengan fullscreen */
+  width: 35px;
+  height: 35px;
+  background-color: #21c065;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+#messageForm {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  color: black;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 80%;
+  max-width: 300px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+}
+
+#messageInput {
+  width: 100%;
+  padding: 10px;
+}
 </style>
 
   <div class="header">
@@ -241,6 +279,17 @@
   </div>
 
   <div class="fullscreen-btn" onclick="toggleFullScreen()">+</div>
+  
+  <!-- Tombol kirim pesan -->
+<div class="send-message-btn" onclick="showMessageForm()">-</div>
+
+<!-- Form Kirim Pesan (Alert) -->
+<div id="messageForm" class="custom-alert" style="display:none;">
+  <h3>Kirim Pesan</h3>
+  <textarea id="messageInput" rows="4" style="width: 100%; padding: 10px;"></textarea><br>
+  <button class="btn-no" onclick="closeForm()">Batal</button>
+  <button class="btn-yes" onclick="sendMessage()">Kirim</button>
+</div>
 
   <!-- Custom Alert -->
   <div id="customAlert" class="custom-alert" style="display:none;">
@@ -253,7 +302,7 @@
 <script type="module">
   // Firebase config
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, set, onDisconnect , remove} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, push, set, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
   import { onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
@@ -281,51 +330,44 @@
     set(userRef, { waktu, userAgent, url });
     onDisconnect(userRef).remove();
   }
-  
-  //listen 
+
   // Listen pesan baru dari Firebase
-  // harus ada sebelum onChildAdded
-const pesanRef = ref(db, "pesan/");
-onChildAdded(pesanRef, (snapshot) => {
-  const { isi } = snapshot.val();
-  tampilkanPesanRandom(isi);
+  const pesanRef = ref(db, "pesan/");
+  onChildAdded(pesanRef, (snapshot) => {
+    const { isi, waktu } = snapshot.val();
+    tampilkanPesan(isi, waktu);
 
-  // Hapus pesan dari database setelah ditampilkan
-  const key = snapshot.key;
-  const pesanItemRef = ref(db, "pesan/" + key);
-  setTimeout(() => {
-    remove(pesanItemRef);
-  }, 100); // kasih jeda dikit biar pesan tampil dulu
-});
+    // Hapus pesan dari database setelah ditampilkan
+    const key = snapshot.key;
+    const pesanItemRef = ref(db, "pesan/" + key);
+    setTimeout(() => {
+      remove(pesanItemRef);
+    }, 100); // Kasih jeda biar pesan tampil dulu
+  });
 
-function tampilkanPesanRandom(text) {
-  const pesanArea = document.getElementById("pesanArea");
-  const pesan = document.createElement("div");
-  pesan.className = "pesanMengambang";
+  function tampilkanPesan(text, waktu) {
+    const pesanArea = document.getElementById("pesanArea");
+    const pesan = document.createElement("div");
+    pesan.className = "pesanMengambang";
 
-  // Contoh isi: "Admin: Haii"
-  const [pengirim, ...isiPesan] = text.split(":");
-  const namaPengirim = pengirim.trim();
-  const isi = isiPesan.join(":").trim();
+    pesan.innerHTML = `
+      <span class="pengirim">Admin (${waktu})</span>
+      ${text}
+    `;
 
-  pesan.innerHTML = `
-    <span class="pengirim">${namaPengirim}</span>
-    ${isi}
-  `;
+    // Posisi acak
+    const x = Math.random() * (window.innerWidth - 200);
+    const y = Math.random() * (window.innerHeight - 60);
+    pesan.style.left = `${x}px`;
+    pesan.style.top = `${y}px`;
 
-  // Posisi acak
-  const x = Math.random() * (window.innerWidth - 200);
-  const y = Math.random() * (window.innerHeight - 60);
-  pesan.style.left = `${x}px`;
-  pesan.style.top = `${y}px`;
+    pesanArea.appendChild(pesan);
 
-  pesanArea.appendChild(pesan);
-
-  // Hapus setelah 3 detik
-  setTimeout(() => {
-    pesan.remove();
-  }, 3000);
-}
+    // Hapus setelah 3 detik
+    setTimeout(() => {
+      pesan.remove();
+    }, 3000);
+  }
 
   // Load link iframe
   const link = localStorage.getItem("ujianLink");
@@ -335,6 +377,34 @@ function tampilkanPesanRandom(text) {
     alert("Tidak ada link ditemukan. Kembali ke halaman awal.");
     window.location.href = "index.html";
   }
+
+  // Tombol kirim pesan dan form
+  window.showMessageForm = function () {
+    document.getElementById("messageForm").style.display = "block";
+  };
+
+  window.closeForm = function () {
+    document.getElementById("messageForm").style.display = "none";
+  };
+
+  window.sendMessage = function () {
+    const message = document.getElementById("messageInput").value;
+    if (message.trim() === "") {
+      alert("Pesan tidak boleh kosong");
+      return;
+    }
+
+    // Kirim pesan ke Firebase
+    const pesanRef = ref(db, "pesan/");
+    const newPesanRef = push(pesanRef);
+    set(newPesanRef, {
+      isi: message,
+      waktu: new Date().toLocaleString('id-ID'),
+    });
+
+    // Tutup form setelah kirim pesan
+    closeForm();
+  };
 
   // Waktu & Tanggal
   function updateWaktu() {
