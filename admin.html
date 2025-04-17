@@ -80,10 +80,15 @@
       <tr><td colspan="3">Memuat data...</td></tr>
     </tbody>
   </table>
+  
+  <h2>Kirim Pesan ke Pengguna</h2>
+<input type="text" id="pesanInput" placeholder="Tulis pesan..." style="padding: 10px; width: 70%;">
+<button onclick="kirimPesan()" style="padding: 10px;">Kirim</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, set, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAs7bvH4MMcIimDVY5cNuSwoaeNTgWahx4",
@@ -107,7 +112,21 @@
       userAgent: navigator.userAgent,
       url: location.href
     });
+    
+    // push 
+    window.kirimPesan = function () {
+  const input = document.getElementById("pesanInput");
+  const isiPesan = input.value.trim();
+  if (!isiPesan) return alert("Pesan tidak boleh kosong");
 
+  const pesanRef = ref(db, "pesan/");
+  push(pesanRef, {
+    isi: isiPesan,
+    waktu: Date.now()
+  });
+
+  input.value = "";
+};
     // Hapus data saat disconnect
     onDisconnect(userRef).remove();
 
