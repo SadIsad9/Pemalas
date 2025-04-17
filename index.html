@@ -3,57 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Web App manifest -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4CAF50">
+
+<!-- Untuk Android -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Exambro">
+
+<!-- Untuk iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Exambro">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Masukkan Link Ujian</title>
   <style>
-    @keyframes fadeInUp {
-      0% {
-        opacity: 0;
-        transform: translateY(40px) scale(0.95);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Arial', sans-serif;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
-      background: linear-gradient(135deg, #fdfbfb, #ebedee);
-      animation: fadeInUp 1s ease-out;
+      background: #f4f5f7;
     }
 
-    .box {
-      background: white;
-      padding: 30px 25px;
+    .container {
+      width: 100%;
+      max-width: 400px;
+      background: #ffffff;
       border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      width: 90%;
-      max-width: 420px;
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+      padding: 20px;
       text-align: center;
-      animation: fadeInUp 1s ease-in-out;
     }
 
     h2 {
-      margin-top: 10px;
-    }
-
-    .warning {
-      color: red;
-      font-weight: bold;
-      animation: fadeInUp 1.3s ease forwards;
+      font-size: 18px;
+      margin-bottom: 20px;
     }
 
     input[type="text"] {
       width: 100%;
-      padding: 14px;
-      margin: 15px 0;
-      border: 1px solid #ccc;
+      padding: 12px;
+      margin: 10px 0;
+      border: 2px solid #4CAF50;
       border-radius: 8px;
       font-size: 16px;
       transition: box-shadow 0.3s ease;
@@ -61,105 +55,163 @@
 
     input[type="text"]:focus {
       outline: none;
-      box-shadow: 0 0 5px #28a745;
-      border-color: #28a745;
+      box-shadow: 0 0 5px #4CAF50;
+      border-color: #4CAF50;
     }
 
     button {
       width: 100%;
-      padding: 14px;
-      background-color: #28a745;
+      padding: 12px;
+      background-color: #4CAF50;
       color: white;
       border: none;
       border-radius: 8px;
       font-size: 16px;
-      font-weight: bold;
-      transition: background 0.3s ease, transform 0.2s ease;
+      margin: 10px 0;
       cursor: pointer;
+      transition: background 0.3s ease;
     }
 
     button:hover {
-      background-color: #218838;
-      transform: scale(1.03);
+      background-color: #45a049;
     }
 
-    footer {
-      position: absolute;
-      bottom: 10px;
-      text-align: center;
+    .instructions {
+      margin-top: 20px;
       font-size: 14px;
-      color: #555;
-      opacity: 0;
-      animation: fadeInUp 1.6s ease forwards;
-      animation-delay: 0.5s;
+      text-align: left;
+      background: #f9f9f9;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    #scannerContainer {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    #closeScanBtn {
+      margin-top: 10px;
+      background-color: #f44336;
+    }
+
+    #closeScanBtn:hover {
+      background-color: #e53935;
     }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h2 class="warning">Peringatan!!!</h2>
-    <h2 class="warning">Jangan lupa setelah masuk, klik icon plus agar memasuki mode fullscreen</h2>
-    <h2 class="warning">Hati-hati sama guru killer, ketauan mampus lu</h2>
-    <h2>Masukkan Link Ujian</h2>
-    <input type="text" id="linkInput" placeholder="https://docs.google.com/...">
-    <button id="goToExambroBtn">Masuk</button>
-    <h2 class="warning">Menuju Indonesia (c) Emas</h2>
+
+  <div class="container">
+    <h2>Masukkan IP address/alamat server</h2>
+    <input type="text" id="linkInput" placeholder="Masukkan alamat server...">
+    
+    <button id="goToExambroBtn">LANJUTKAN</button>
+    <button id="startScanBtn">SCAN QR CODE ALAMAT SERVER</button>
+    <button id="galleryScanBtn">SCAN QR CODE DARI GALLERY</button>
+
+    <div id="scannerContainer">
+      <video id="preview"></video>
+      <button id="closeScanBtn">TUTUP SCAN</button>
+    </div>
+
+    <div class="instructions">
+      <h3>Petunjuk:</h3>
+      <ol>
+        <li>Jangan menggunakan url yang dibuat pendek (url shortener).</li>
+        <li>Bila membuat qrcode di website qrcode generator, pilih yang freetext bukan url dan jangan disertakan http/https.</li>
+      </ol>
+    </div>
   </div>
 
-  <footer>© 2025 irsad_hytam</footer>
-
   <script type="module">
-    // Mengimpor Firebase modul
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-    // Konfigurasi Firebase kamu
     const firebaseConfig = {
       apiKey: "AIzaSyAs7bvH4MMcIimDVY5cNuSwoaeNTgWahx4",
       authDomain: "exambro-4b098.firebaseapp.com",
       databaseURL: "https://exambro-4b098-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "exambro-4b098",
-      storageBucket: "exambro-4b098.firebasestorage.app",
+      storageBucket: "exambro-4b098.appspot.com",
       messagingSenderId: "626797016044",
       appId: "1:626797016044:web:2dd7f66db290464e6f86c9"
     };
 
-    // Inisialisasi Firebase
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
-    // Fungsi untuk menangani pengiriman link ujian
     function goToExambro() {
-  const link = document.getElementById("linkInput").value.trim();
+      const link = document.getElementById("linkInput").value.trim();
 
-  if (link === "") {
-    alert("Masukkan link terlebih dahulu!");
-  } else if (link === "admin123#") {
-    window.location.href = "admin.html";
-  } else {
-    // Menyimpan link ke localStorage
-    localStorage.setItem("ujianLink", link);
+      if (link === "") {
+        alert("Masukkan link terlebih dahulu!");
+      } else if (link === "admin123#") {
+        window.location.href = "admin.html";
+      } else {
+        localStorage.setItem("ujianLink", link);
 
-    // Menyimpan status pengguna yang online ke Firebase
-    const userId = "user_" + new Date().getTime();  // Unik ID berdasarkan waktu
-    const userRef = ref(database, 'onlineUsers/' + userId);
+        const userId = "user_" + new Date().getTime();
+        const userRef = ref(database, 'onlineUsers/' + userId);
 
-    set(userRef, {
-      link: link,
-      status: 'online',
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      waktu: new Date().toLocaleString(),
-      url: link
+        set(userRef, {
+          link: link,
+          status: 'online',
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          waktu: new Date().toLocaleString(),
+          url: link
+        });
+
+        window.location.href = "ujian.html";
+      }
+    }
+
+    document.getElementById("goToExambroBtn").addEventListener("click", goToExambro);
+
+    // QR SCAN
+    let scanner;
+
+    document.getElementById("startScanBtn").addEventListener("click", function() {
+      document.getElementById("scannerContainer").style.display = "flex";
+      document.getElementById("startScanBtn").style.display = "none";
+
+      import('https://rawcdn.githack.com/schmich/instascan-builds/master/instascan.min.js')
+        .then(module => {
+          scanner = new module.Scanner({ video: document.getElementById('preview') });
+
+          module.Camera.getCameras().then(function(cameras) {
+            if (cameras.length > 0) {
+              scanner.start(cameras[0]);
+            } else {
+              alert("Tidak ada kamera yang ditemukan.");
+            }
+          }).catch(function(e) {
+            console.error(e);
+          });
+
+          scanner.addListener('scan', function(content) {
+            document.getElementById("linkInput").value = content;
+            goToExambro();
+          });
+        });
     });
 
-    // Arahkan ke halaman ujian
-    window.location.href = "ujian.html";
-  }
-}
-
-    // Menambahkan event listener untuk tombol "Masuk"
-    document.getElementById("goToExambroBtn").addEventListener("click", goToExambro);
+    document.getElementById("closeScanBtn").addEventListener("click", function() {
+      document.getElementById("scannerContainer").style.display = "none";
+      document.getElementById("startScanBtn").style.display = "block";
+      if (scanner) {
+        scanner.stop();
+      }
+    });
   </script>
 </body>
 </html>
