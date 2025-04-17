@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scan Barcode Ujian</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #fdfbfb, #ebedee);
+    }
+
+    .container {
+      text-align: center;
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    #scanner {
+      width: 300px;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 12px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Scan Barcode Ujian</h2>
+    <div id="scanner"></div>
+    <button onclick="startScan()">Mulai Scan</button>
+  </div>
+
+  <script>
+    function startScan() {
+      const html5QrCode = new Html5Qrcode("scanner");
+
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+          const backCamera = devices.find(device => device.label.toLowerCase().includes("back")) || devices[0];
+
+          html5QrCode.start(
+            { deviceId: { exact: backCamera.id } },
+            { fps: 10, qrbox: 250 },
+            (decodedText, decodedResult) => {
+              // Simpan hasil barcode dan pindah ke ujian.html
+              localStorage.setItem("barcodeUjian", decodedText);
+              html5QrCode.stop().then(() => {
+                window.location.href = "ujian.html";
+              });
+            },
+            errorMessage => {
+              console.warn("QR Code tidak terbaca:", errorMessage);
+            }
+          );
+        } else {
+          alert("Kamera tidak ditemukan.");
+        }
+      }).catch(err => {
+        alert("Gagal mengakses kamera: " + err);
+      });
+    }
+  </script>
+</body>
+</html>
