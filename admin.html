@@ -1,42 +1,142 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Admin Panel - Pengguna Online</title>
+  <meta charset="UTF-8">
+  <title>Admin - Data Pengguna</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      background-color: #f7f7f7;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    .online-info {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 18px;
+      color: #333;
+    }
+
+    .dot {
+      height: 12px;
+      width: 12px;
+      background-color: #4CAF50;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-  <h1>Daftar Pengguna Online:</h1>
-  <ul id="userList"></ul>
+  <h1>Data Pengguna Aktif</h1>
+  <div class="online-info">
+    <span class="dot"></span>
+    <span id="onlineCount">Menghitung...</span> pengguna online
+  </div>
+
+  <table id="userTable">
+    <thead>
+      <tr>
+        <th>Waktu</th>
+        <th>Browser</th>
+        <th>Link Ujian</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <tr><td colspan="3">Memuat data...</td></tr>
+    </tbody>
+  </table>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAs7bvH4MMcIimDVY5cNuSwoaeNTgWahx4",
       authDomain: "exambro-4b098.firebaseapp.com",
+      databaseURL: "https://exambro-4b098-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "exambro-4b098",
-      storageBucket: "exambro-4b098.firebasestorage.app",
+      storageBucket: "exambro-4b098.appspot.com",
       messagingSenderId: "626797016044",
-      appId: "1:626797016044:web:2dd7f66db290464e6f86c9",
-      databaseURL: "https://exambro-4b098-default-rtdb.firebaseio.com"
+      appId: "1:626797016044:web:2dd7f66db290464e6f86c9"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const userList = document.getElementById("userList");
 
-    const usersRef = ref(db, "users");
+    const userId = "user_" + Math.random().toString(36).substring(2, 10);
+    const userRef = ref(db, "pengguna/" + userId);
 
-    onValue(usersRef, (snapshot) => {
-      userList.innerHTML = "";
-      snapshot.forEach(child => {
-        const user = child.val();
-        if (user.status === "online") {
-          const li = document.createElement("li");
-          li.textContent = `${child.key} - Aktif: ${user.lastSeen}`;
-          userList.appendChild(li);
-        }
-      });
+    // Simpan data pengguna
+    set(userRef, {
+      waktu: new Date().toLocaleString(),
+      userAgent: navigator.userAgent,
+      url: location.href
+    });
+
+    // Hapus data saat disconnect
+    onDisconnect(userRef).remove();
+
+    // Tampilkan data pengguna
+    const tableBody = document.getElementById("tableBody");
+    const onlineCount = document.getElementById("onlineCount");
+
+    const rootRef = ref(db, "pengguna/");
+    onValue(rootRef, (snapshot) => {
+      const data = snapshot.val();
+      tableBody.innerHTML = "";
+
+      if (data) {
+        const rows = Object.values(data).reverse();
+        onlineCount.textContent = rows.length;
+
+        rows.forEach((item) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.waktu}</td>
+            <td>${item.userAgent}</td>
+            <td><a href="${item.url}" target="_blank">${item.url}</a></td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        onlineCount.textContent = "0";
+        tableBody.innerHTML = `<tr><td colspan="3">Belum ada data pengguna.</td></tr>`;
+      }
     });
   </script>
 </body>

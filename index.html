@@ -68,7 +68,6 @@
     button {
       width: 100%;
       padding: 14px;
-      margin-bottom: 10px;
       background-color: #28a745;
       color: white;
       border: none;
@@ -101,35 +100,66 @@
     <h2 class="warning">Peringatan!!!</h2>
     <h2 class="warning">Jangan lupa setelah masuk, klik icon plus agar memasuki mode fullscreen</h2>
     <h2 class="warning">Hati-hati sama guru killer, ketauan mampus lu</h2>
-    <h2>Masukkan Link Ujian atau Nick Admin</h2>
-    <input type="text" id="linkInput" placeholder="Link ujian atau nick admin">
-    <button onclick="goToExambro()">Masuk Sebagai Peserta</button>
-    <button onclick="loginAdmin()">Login Admin</button>
+    <h2>Masukkan Link Ujian</h2>
+    <input type="text" id="linkInput" placeholder="https://docs.google.com/...">
+    <button id="goToExambroBtn">Masuk</button>
     <h2 class="warning">Menuju Indonesia (c) Emas</h2>
   </div>
 
   <footer>© 2025 irsad_hytam</footer>
 
-  <script>
-    function goToExambro() {
-      const link = document.getElementById("linkInput").value;
-      if (link.trim() !== "") {
-        localStorage.setItem("ujianLink", link);
-        window.location.href = "ujian.html";
-      } else {
-        alert("Masukkan link terlebih dahulu!");
-      }
-    }
+  <script type="module">
+    // Mengimpor Firebase modul
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-    function loginAdmin() {
-      const nick = document.getElementById("linkInput").value.trim().toLowerCase();
-      if (nick === "admin123") {
-        alert("Selamat datang, Admin!");
-        window.location.href = "admin.html";
-      } else {
-        alert("Nickname admin salah!");
-      }
-    }
+    // Konfigurasi Firebase kamu
+    const firebaseConfig = {
+      apiKey: "AIzaSyAs7bvH4MMcIimDVY5cNuSwoaeNTgWahx4",
+      authDomain: "exambro-4b098.firebaseapp.com",
+      databaseURL: "https://exambro-4b098-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "exambro-4b098",
+      storageBucket: "exambro-4b098.firebasestorage.app",
+      messagingSenderId: "626797016044",
+      appId: "1:626797016044:web:2dd7f66db290464e6f86c9"
+    };
+
+    // Inisialisasi Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Fungsi untuk menangani pengiriman link ujian
+    function goToExambro() {
+  const link = document.getElementById("linkInput").value.trim();
+
+  if (link === "") {
+    alert("Masukkan link terlebih dahulu!");
+  } else if (link === "admin123#") {
+    window.location.href = "admin.html";
+  } else {
+    // Menyimpan link ke localStorage
+    localStorage.setItem("ujianLink", link);
+
+    // Menyimpan status pengguna yang online ke Firebase
+    const userId = "user_" + new Date().getTime();  // Unik ID berdasarkan waktu
+    const userRef = ref(database, 'onlineUsers/' + userId);
+
+    set(userRef, {
+      link: link,
+      status: 'online',
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      waktu: new Date().toLocaleString(),
+      url: link
+    });
+
+    // Arahkan ke halaman ujian
+    window.location.href = "ujian.html";
+  }
+}
+
+    // Menambahkan event listener untuk tombol "Masuk"
+    document.getElementById("goToExambroBtn").addEventListener("click", goToExambro);
   </script>
 </body>
 </html>
