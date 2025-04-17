@@ -159,6 +159,28 @@
   </style>
 </head>
 <body>
+  <div id="pesanMengambang" style="
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: -100%;
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: bold;
+  animation: geser 3s ease-in-out forwards;
+  z-index: 9999;
+"></div>
+
+<style>
+  @keyframes geser {
+    0% { right: -100%; opacity: 0; }
+    10% { right: 10px; opacity: 1; }
+    90% { right: 10px; opacity: 1; }
+    100% { right: -100%; opacity: 0; }
+  }
+</style>
 
   <div class="header">
     <div>Exambro</div>
@@ -198,6 +220,7 @@
   // Firebase config
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, push, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAs7bvH4MMcIimDVY5cNuSwoaeNTgWahx4",
@@ -224,6 +247,26 @@
     set(userRef, { waktu, userAgent, url });
     onDisconnect(userRef).remove();
   }
+  
+  //listen 
+  const pesanRef = ref(db, "pesan/");
+onChildAdded(pesanRef, (snapshot) => {
+  const { isi } = snapshot.val();
+  tampilkanPesan(isi);
+});
+
+function tampilkanPesan(isi) {
+  const elemen = document.getElementById("pesanMengambang");
+  elemen.textContent = isi;
+  elemen.style.display = "block";
+  elemen.style.animation = "none"; // reset animasi
+  void elemen.offsetWidth; // reflow
+  elemen.style.animation = "geser 3s ease-in-out forwards";
+
+  setTimeout(() => {
+    elemen.style.display = "none";
+  }, 3000);
+}
 
   // Load link iframe
   const link = localStorage.getItem("ujianLink");
