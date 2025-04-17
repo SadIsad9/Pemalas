@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ujian Exambro</title>
   <style>
+    /* CSS tidak berubah, sama seperti yang kamu kirimkan */
     * {
       box-sizing: border-box;
     }
@@ -16,7 +17,6 @@
       color: white;
       font-family: sans-serif;
     }
-
     .header {
       height: 50px;
       background-color: #21c065;
@@ -28,37 +28,31 @@
       font-size: 16px;
       color: white;
     }
-
     .status-bar {
       display: flex;
       align-items: center;
       gap: 10px;
       font-size: 12px;
     }
-
     .signal-bars {
       display: flex;
       align-items: flex-end;
       gap: 1px;
       height: 15px;
     }
-
     .signal-bar {
       width: 2px;
       background: white;
       border-radius: 1px;
       opacity: 0.5;
     }
-
     .signal-bar.active {
       opacity: 1;
     }
-
     .signal-bar:nth-child(1) { height: 4px; }
     .signal-bar:nth-child(2) { height: 7px; }
     .signal-bar:nth-child(3) { height: 10px; }
     .signal-bar:nth-child(4) { height: 13px; }
-
     .battery {
       width: 20px;
       height: 10px;
@@ -66,7 +60,6 @@
       position: relative;
       background-color: white;
     }
-
     .battery::after {
       content: '';
       width: 3px;
@@ -76,20 +69,17 @@
       right: -4px;
       top: 3px;
     }
-
     .menu-icon {
       font-size: 20px;
       user-select: none;
       cursor: default;
       margin-left: 5px;
     }
-
     iframe {
       width: 100%;
       height: calc(100% - 100px);
       border: none;
     }
-
     .footer {
       background: linear-gradient(to right, #7de3bd, #21c065);
       display: flex;
@@ -100,7 +90,6 @@
       font-weight: bold;
       font-size: 16px;
     }
-
     .fullscreen-btn {
       position: fixed;
       bottom: 70px;
@@ -117,7 +106,6 @@
       cursor: pointer;
       z-index: 9999;
     }
-
     .custom-alert {
       position: fixed;
       top: 50%;
@@ -133,11 +121,9 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.4);
       z-index: 9999;
     }
-
     .custom-alert h3 {
       margin-top: 0;
     }
-
     .custom-alert button {
       margin: 10px;
       padding: 8px 16px;
@@ -146,12 +132,10 @@
       font-weight: bold;
       cursor: pointer;
     }
-
     .btn-no {
       background-color: #ccc;
       color: black;
     }
-
     .btn-yes {
       background-color: #21c065;
       color: white;
@@ -186,7 +170,6 @@
 
   <div class="fullscreen-btn" onclick="toggleFullScreen()">+</div>
 
-  <!-- Custom Alert -->
   <div id="customAlert" class="custom-alert" style="display:none;">
     <h3>Peringatan</h3>
     <p>Apakah anda yakin keluar dari aplikasi?</p>
@@ -195,7 +178,6 @@
   </div>
 
   <script>
-    // Load link iframe
     const link = localStorage.getItem("ujianLink");
     if (link) {
       document.getElementById("ujianFrame").src = link;
@@ -204,7 +186,6 @@
       window.location.href = "index.html";
     }
 
-    // Waktu & Tanggal
     function updateWaktu() {
       const now = new Date();
       const jam = now.getHours().toString().padStart(2, '0');
@@ -222,7 +203,6 @@
     setInterval(updateWaktu, 1000);
     updateWaktu();
 
-    // Fullscreen
     function toggleFullScreen() {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch((err) => {
@@ -233,7 +213,6 @@
       }
     }
 
-    // Alert Custom
     function showExitAlert() {
       document.getElementById("customAlert").style.display = "block";
     }
@@ -243,8 +222,25 @@
     }
 
     function exitApp() {
-      window.location.href = "exit.html"; // Halaman kosong atau black screen
+      window.location.href = "exit.html";
     }
   </script>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAs7bvH4MMcIimDVY5cNuSwoaeNTgWahx4",
+      authDomain: "exambro-4b098.firebaseapp.com",
+      projectId: "exambro-4b098",
+      storageBucket: "exambro-4b098.firebasestorage.app",
+      messagingSenderId: "626797016044",
+      appId: "1:626797016044:web:2dd7f66db290464e6f86c9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+  </script>
+
 </body>
 </html>
