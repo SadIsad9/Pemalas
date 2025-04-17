@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ujian Exambro</title>
   <style>
-    /* CSS tidak berubah, sama seperti yang kamu kirimkan */
+    /* CSS tidak berubah, sama seperti yang Anda kirimkan */
     * {
       box-sizing: border-box;
     }
@@ -214,32 +214,16 @@
     }
 
     function showExitAlert() {
-      document.getElementById("customAlert").style.display = "block";
+      document.getElementById("customAlert").style.display = 'block';
     }
 
     function closeAlert() {
-      document.getElementById("customAlert").style.display = "none";
+      document.getElementById("customAlert").style.display = 'none';
     }
 
     function exitApp() {
-      window.location.href = "exit.html";
+      window.location.href = "index.html";
     }
-  </script>
-
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAs7bvH4MMcIimDVY5cNuSwoaeNTgWahx4",
-      authDomain: "exambro-4b098.firebaseapp.com",
-      projectId: "exambro-4b098",
-      storageBucket: "exambro-4b098.firebasestorage.app",
-      messagingSenderId: "626797016044",
-      appId: "1:626797016044:web:2dd7f66db290464e6f86c9"
-    };
-
-    const app = initializeApp(firebaseConfig);
   </script>
 
 </body>
