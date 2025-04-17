@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#1abc9c">
-  <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Scan QR Ujian</title>
   <style>
     * {
@@ -82,11 +80,33 @@
       margin-left: 20px;
     }
 
-    #reader {
-      margin-top: 20px;
+    #fullscreen-scanner {
       display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      z-index: 9999;
+    }
+
+    #reader {
       width: 100%;
-      max-width: 500px;
+      height: 100%;
+    }
+
+    #closeScanner {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: red;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      z-index: 10000;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -96,9 +116,9 @@
     <div class="card">
       <h2>Masukkan IP address/alamat server</h2>
       <input type="text" id="ipInput" placeholder="Contoh: 192.168.1.1" />
-      <button id="btnLanjut">LANJUTKAN</button>
-      <button id="btnScan">SCAN QR CODE ALAMAT SERVER</button>
-      <button id="btnGallery">SCAN QR CODE DARI GALLERY</button>
+      <button id="nextBtn">LANJUTKAN</button>
+      <button id="scanBtn">SCAN QR CODE ALAMAT SERVER</button>
+      <button>SCAN QR CODE DARI GALLERY</button>
 
       <div class="note">
         <p><strong>Petunjuk:</strong></p>
@@ -108,47 +128,47 @@
         </ol>
       </div>
     </div>
+  </div>
 
+  <div id="fullscreen-scanner">
+    <button id="closeScanner">Tutup</button>
     <div id="reader"></div>
   </div>
 
-  <!-- QR Code scanner -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script>
-    const btnScan = document.getElementById('btnScan');
-    const readerDiv = document.getElementById('reader');
-    const ipInput = document.getElementById('ipInput');
+    const scanBtn = document.getElementById("scanBtn");
+    const closeBtn = document.getElementById("closeScanner");
+    const scanner = document.getElementById("fullscreen-scanner");
+    const input = document.getElementById("ipInput");
+    const html5QrCode = new Html5Qrcode("reader");
 
-    btnScan.addEventListener('click', () => {
-      readerDiv.style.display = "block";
-
-      const html5QrCode = new Html5Qrcode("reader");
-
-      Html5Qrcode.getCameras().then(devices => {
-        if (devices && devices.length) {
-          const cameraId = devices[0].id;
-
-          html5QrCode.start(
-            cameraId,
-            {
-              fps: 10,
-              qrbox: 250
-            },
-            qrCodeMessage => {
-              alert(`QR Code terdeteksi: ${qrCodeMessage}`);
-              ipInput.value = qrCodeMessage;
-              html5QrCode.stop();
-              readerDiv.style.display = "none";
-            },
-            errorMessage => {
-              console.warn(errorMessage);
-            }
-          ).catch(err => {
-            console.error("Gagal mulai scanner: ", err);
+    scanBtn.addEventListener("click", () => {
+      scanner.style.display = "block";
+      html5QrCode.start(
+        { facingMode: "environment" }, // pakai kamera belakang
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 }
+        },
+        qrMessage => {
+          input.value = qrMessage;
+          html5QrCode.stop().then(() => {
+            scanner.style.display = "none";
           });
+        },
+        error => {
+          // Bisa diabaikan atau ditampilkan di console
         }
-      }).catch(err => {
-        console.error("Tidak bisa mendeteksi kamera: ", err);
+      ).catch(err => {
+        alert("Gagal membuka kamera: " + err);
+        scanner.style.display = "none";
+      });
+    });
+
+    closeBtn.addEventListener("click", () => {
+      html5QrCode.stop().then(() => {
+        scanner.style.display = "none";
       });
     });
   </script>
