@@ -3,84 +3,83 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Scan Barcode Ujian</title>
+  <title>Scan QR Ujian</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      background: linear-gradient(135deg, #fdfbfb, #ebedee);
+      margin: 0;
+      background: #f0f0f0;
     }
 
-    .container {
-      text-align: center;
+    .box {
       background: white;
-      padding: 25px;
+      padding: 20px;
       border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
     }
 
-    #scanner {
-      width: 300px;
+    #reader {
+      width: 100%;
       margin-top: 20px;
+      display: none;
     }
 
     button {
-      padding: 12px 20px;
-      background-color: #28a745;
-      color: white;
+      padding: 12px;
+      width: 100%;
       border: none;
       border-radius: 8px;
-      font-size: 16px;
+      background: #28a745;
+      color: white;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 15px;
+      margin-top: 10px;
     }
 
     button:hover {
-      background-color: #218838;
+      background: #218838;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Scan Barcode Ujian</h2>
-    <div id="scanner"></div>
-    <button onclick="startScan()">Mulai Scan</button>
+  <div class="box">
+    <h2>Scan QR untuk Masuk Ujian</h2>
+    <div id="reader"></div>
+    <button onclick="startScan()">Mulai Scan QR</button>
   </div>
 
   <script>
+    const html5Qrcode = new Html5Qrcode("reader");
+
     function startScan() {
-      const html5QrCode = new Html5Qrcode("scanner");
+      const readerElem = document.getElementById("reader");
+      readerElem.style.display = "block";
 
-      Html5Qrcode.getCameras().then(devices => {
-        if (devices && devices.length) {
-          const backCamera = devices.find(device => device.label.toLowerCase().includes("back")) || devices[0];
-
-          html5QrCode.start(
-            { deviceId: { exact: backCamera.id } },
-            { fps: 10, qrbox: 250 },
-            (decodedText, decodedResult) => {
-              // Simpan hasil barcode dan pindah ke ujian.html
-              localStorage.setItem("barcodeUjian", decodedText);
-              html5QrCode.stop().then(() => {
-                window.location.href = "ujian.html";
-              });
-            },
-            errorMessage => {
-              console.warn("QR Code tidak terbaca:", errorMessage);
-            }
-          );
-        } else {
-          alert("Kamera tidak ditemukan.");
+      html5Qrcode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        function onSuccess(decodedText) {
+          localStorage.setItem("ujianLink", decodedText);
+          html5Qrcode.stop().then(() => {
+            readerElem.style.display = "none";
+            window.location.href = "ujian.html";
+          });
+        },
+        function onError(err) {
+          console.warn("QR Error:", err);
         }
-      }).catch(err => {
-        alert("Gagal mengakses kamera: " + err);
+      ).catch(err => {
+        alert("Gagal akses kamera! Coba buka di browser lain atau pastikan izinnya aktif.");
+        console.error(err);
       });
     }
   </script>
