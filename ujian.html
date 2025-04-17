@@ -159,26 +159,60 @@
   </style>
 </head>
 <body>
-  <div id="pesanMengambang" style="
-  display: none;
-  position: fixed;
-  top: 20px;
-  right: -100%;
-  background-color: #28a745;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 30px;
-  font-weight: bold;
-  animation: geser 3s ease-in-out forwards;
-  z-index: 9999;
-"></div>
+  <div id="pesanArea"></div>
+  <style>
+  #pesanArea {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+  }
 
-<style>
-  @keyframes geser {
-    0% { right: -100%; opacity: 0; }
-    10% { right: 10px; opacity: 1; }
-    90% { right: 10px; opacity: 1; }
-    100% { right: -100%; opacity: 0; }
+  .pesanMengambang {
+    position: absolute;
+    background: linear-gradient(145deg, #111, #1a1a1a);
+    color: gold;
+    font-weight: 600;
+    padding: 8px 14px;
+    border: 1.5px solid gold;
+    border-radius: 10px;
+    font-size: 13px;
+    max-width: 220px;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    animation: fadeInOut 3s ease-in-out forwards;
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  .pesanMengambang .pengirim {
+    font-size: 11px;
+    color: #ccc;
+    margin-bottom: 2px;
+    display: block;
+    font-style: italic;
+  }
+
+  @keyframes fadeInOut {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    10% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    90% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.1);
+    }
   }
 </style>
 
@@ -219,7 +253,7 @@
 <script type="module">
   // Firebase config
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, push, set, onDisconnect , remove} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
   import { onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
@@ -249,22 +283,47 @@
   }
   
   //listen 
-  const pesanRef = ref(db, "pesan/");
+  // Listen pesan baru dari Firebase
+  // harus ada sebelum onChildAdded
+const pesanRef = ref(db, "pesan/");
 onChildAdded(pesanRef, (snapshot) => {
   const { isi } = snapshot.val();
-  tampilkanPesan(isi);
+  tampilkanPesanRandom(isi);
+
+  // Hapus pesan dari database setelah ditampilkan
+  const key = snapshot.key;
+  const pesanItemRef = ref(db, "pesan/" + key);
+  setTimeout(() => {
+    remove(pesanItemRef);
+  }, 100); // kasih jeda dikit biar pesan tampil dulu
 });
 
-function tampilkanPesan(isi) {
-  const elemen = document.getElementById("pesanMengambang");
-  elemen.textContent = isi;
-  elemen.style.display = "block";
-  elemen.style.animation = "none"; // reset animasi
-  void elemen.offsetWidth; // reflow
-  elemen.style.animation = "geser 3s ease-in-out forwards";
+function tampilkanPesanRandom(text) {
+  const pesanArea = document.getElementById("pesanArea");
+  const pesan = document.createElement("div");
+  pesan.className = "pesanMengambang";
 
+  // Contoh isi: "Admin: Haii"
+  const [pengirim, ...isiPesan] = text.split(":");
+  const namaPengirim = pengirim.trim();
+  const isi = isiPesan.join(":").trim();
+
+  pesan.innerHTML = `
+    <span class="pengirim">${namaPengirim}</span>
+    ${isi}
+  `;
+
+  // Posisi acak
+  const x = Math.random() * (window.innerWidth - 200);
+  const y = Math.random() * (window.innerHeight - 60);
+  pesan.style.left = `${x}px`;
+  pesan.style.top = `${y}px`;
+
+  pesanArea.appendChild(pesan);
+
+  // Hapus setelah 3 detik
   setTimeout(() => {
-    elemen.style.display = "none";
+    pesan.remove();
   }, 3000);
 }
 
