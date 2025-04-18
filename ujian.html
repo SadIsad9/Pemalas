@@ -157,6 +157,38 @@
       color: white;
     }
   </style>
+  
+   <script>
+    const firebaseScript = document.createElement('script');
+    firebaseScript.type = 'module';
+    firebaseScript.textContent = `
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+      const app = initializeApp({
+        apiKey: "AIzaSyAs7bvH4MMcIimDVY5cNuSwoaeNTgWahx4",
+        authDomain: "exambro-4b098.firebaseapp.com",
+        databaseURL: "https://exambro-4b098-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "exambro-4b098",
+        storageBucket: "exambro-4b098.appspot.com",
+        messagingSenderId: "626797016044",
+        appId: "1:626797016044:web:2dd7f66db290464e6f86c9"
+      });
+
+      const db = getDatabase(app);
+      const ua = btoa(navigator.userAgent);
+      const refUA = ref(db, "terblokirUserAgent/" + ua);
+
+      get(refUA).then(snap => {
+        if (snap.exists()) {
+          document.body.innerHTML = "<h1 style='text-align:center; color:red;'>Akses Ditolak<br>User-Agent kamu diblokir.</h1>";
+          throw new Error("Akses diblokir.");
+        }
+      });
+    `;
+    document.head.appendChild(firebaseScript);
+  </script>
+  
 </head>
 <body>
   <div id="pesanArea"></div>
@@ -302,7 +334,7 @@
 <script type="module">
   // Firebase config
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, set, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, push, set, onDisconnect, remove , onValue, get} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
   import { onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
@@ -330,6 +362,17 @@
     set(userRef, { waktu, userAgent, url });
     onDisconnect(userRef).remove();
   }
+  
+  // Cek blokir User-Agent tiap 5 detik
+setInterval(() => {
+  const ua = btoa(navigator.userAgent);
+  const cekRef = ref(db, "terblokirUserAgent/" + ua);
+  get(cekRef).then(snap => {
+    if (snap.exists()) {
+      document.body.innerHTML = "<h1 style='text-align:center; color:red;'>Admin Marah<br>Akses kamu ditolak.</h1>";
+    }
+  });
+}, 5000);
 
   // Listen pesan baru dari Firebase
   const pesanRef = ref(db, "pesan/");
