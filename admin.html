@@ -9,19 +9,11 @@
       padding: 20px;
       background-color: #f7f7f7;
     }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 5px;
-    }
-
+    h1 { text-align: center; }
     .online-info {
       text-align: center;
       margin-bottom: 20px;
-      font-size: 18px;
-      color: #333;
     }
-
     .dot {
       height: 12px;
       width: 12px;
@@ -30,68 +22,47 @@
       display: inline-block;
       margin-right: 5px;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
       background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      border-radius: 8px;
-      overflow: hidden;
+      margin-bottom: 20px;
     }
-
     th, td {
       border: 1px solid #ddd;
       padding: 10px;
-      text-align: left;
     }
-
     th {
       background-color: #f2f2f2;
     }
-
-    a {
-      color: #007BFF;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
     button {
-      padding: 10px 20px;
-      background-color: #007BFF;
-      color: white;
+      padding: 6px 10px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
     }
-
-    button:hover {
-      background-color: #0056b3;
+    .blokir-btn {
+      background-color: #dc3545;
+      color: white;
     }
-
-    #pesanInput {
-      padding: 10px;
-      flex: 1;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+    .kirim-btn {
+      background-color: #007BFF;
+      color: white;
     }
-
-    .pesan-wrapper {
-      margin-top: 20px;
-      display: flex;
-      gap: 10px;
+    input {
+      padding: 8px;
+      width: 70%;
+      margin-right: 10px;
     }
   </style>
+
+  <!-- UAParser.js -->
+  <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0.7.28/dist/ua-parser.min.js"></script>
 </head>
 <body>
   <h1>Data Pengguna Aktif</h1>
   <div class="online-info">
-    <span class="dot"></span>
-    <span id="onlineCount">Menghitung...</span> pengguna online
+    <span class="dot"></span> <span id="onlineCount">Memuat...</span> pengguna online
   </div>
 
   <table id="userTable">
@@ -100,24 +71,38 @@
         <th>Waktu</th>
         <th>Browser</th>
         <th>Link Ujian</th>
+        <th>Android ID</th>
+        <th>Perangkat</th>
+        <th>Aksi</th>
       </tr>
     </thead>
     <tbody id="tableBody">
-      <tr><td colspan="3">Memuat data...</td></tr>
+      <tr><td colspan="6">Memuat data...</td></tr>
     </tbody>
   </table>
-  
+
+  <h2>Daftar User-Agent Terblokir</h2>
+  <table id="blokirTable">
+    <thead>
+      <tr>
+        <th>User-Agent</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="blokirBody">
+      <tr><td colspan="2">Memuat data...</td></tr>
+    </tbody>
+  </table>
+
   <h2>Kirim Pesan ke Pengguna</h2>
-  <div class="pesan-wrapper">
-    <input type="text" id="pesanInput" placeholder="Contoh: Haii semuanya">
-    <button onclick="kirimPesan()">Kirim</button>
-  </div>
+  <input type="text" id="pesanInput" placeholder="Pesan ke semua pengguna">
+  <button class="kirim-btn" onclick="kirimPesan()">Kirim</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, onDisconnect, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, set, onValue, onDisconnect, push, remove, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    const firebaseConfig = {
+    const app = initializeApp({
       apiKey: "AIzaSyAs7bvH4MMcIimDVY5cNuSwoaeNTgWahx4",
       authDomain: "exambro-4b098.firebaseapp.com",
       databaseURL: "https://exambro-4b098-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -125,66 +110,109 @@
       storageBucket: "exambro-4b098.appspot.com",
       messagingSenderId: "626797016044",
       appId: "1:626797016044:web:2dd7f66db290464e6f86c9"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const userId = "user_" + Math.random().toString(36).substring(2, 10);
-    const userRef = ref(db, "pengguna/" + userId);
-
-    // Simpan data pengguna
-    set(userRef, {
-      waktu: new Date().toLocaleString(),
-      userAgent: navigator.userAgent,
-      url: location.href
     });
 
-    // Fungsi kirim pesan
-    window.kirimPesan = function () {
-      const input = document.getElementById("pesanInput");
-      const isiPesan = input.value.trim();
-      if (!isiPesan) return alert("Pesan tidak boleh kosong");
+    const db = getDatabase(app);
+    const userAgent = navigator.userAgent;
+    const encodedUA = btoa(userAgent);
 
-      const pesanRef = ref(db, "pesan/");
-      push(pesanRef, {
-        isi: "Admin: " + isiPesan,
-        waktu: Date.now()
-      });
+    // Cek apakah user diblokir
+    const uaRef = ref(db, "terblokirUserAgent/" + encodedUA);
+    const snap = await get(uaRef);
+    if (snap.exists()) {
+      document.body.innerHTML = "<h1 style='color:red;text-align:center;'>Akses diblokir</h1>";
+      throw new Error("UA diblokir");
+    }
 
-      input.value = "";
-    };
+    // Pakai UAParser setelah tersedia
+    const parser = new UAParser();
+    const result = parser.setUA(userAgent).getResult();
+    const deviceName = `${result.device.model || result.os.name || "Unknown OS"} - ${result.browser.name || "Unknown Browser"}`;
 
-    // Hapus data saat disconnect
+    const userId = "user_" + Math.random().toString(36).substring(2, 10);
+    const androidId = localStorage.getItem("androidId") || "UNKNOWN";
+    const userRef = ref(db, "pengguna/" + userId);
+
+    set(userRef, {
+      waktu: new Date().toLocaleString(),
+      userAgent,
+      perangkat: deviceName,
+      url: location.href,
+      androidId
+    });
+
     onDisconnect(userRef).remove();
 
-    // Tampilkan data pengguna
+    window.kirimPesan = function () {
+      const isi = document.getElementById("pesanInput").value;
+      if (!isi) return alert("Pesan tidak boleh kosong!");
+      push(ref(db, "pesan/"), {
+        isi: "Admin: " + isi,
+        waktu: Date.now()
+      });
+      document.getElementById("pesanInput").value = "";
+    };
+
+    window.blokirUserAgent = function (ua) {
+      const encoded = btoa(ua);
+      set(ref(db, "terblokirUserAgent/" + encoded), true).then(() => alert("User-Agent diblokir."));
+    };
+
+    window.bukaBlokir = function (encoded) {
+      remove(ref(db, "terblokirUserAgent/" + encoded)).then(() => alert("Blokir dicabut."));
+    };
+
+    window.blokirPengguna = function (androidId) {
+      set(ref(db, "terblokir/" + androidId), true).then(() => alert("Pengguna diblokir."));
+    };
+
+    // Tampilkan pengguna
     const tableBody = document.getElementById("tableBody");
     const onlineCount = document.getElementById("onlineCount");
 
-    const rootRef = ref(db, "pengguna/");
-    onValue(rootRef, (snapshot) => {
-      const data = snapshot.val();
+    onValue(ref(db, "pengguna/"), snap => {
+      const data = snap.val();
       tableBody.innerHTML = "";
+      const users = data ? Object.values(data) : [];
+      onlineCount.textContent = users.length;
+
+      users.reverse().forEach(d => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${d.waktu}</td>
+          <td>${d.userAgent}</td>
+          <td><a href="${d.url}" target="_blank">${d.url}</a></td>
+          <td>${d.androidId}</td>
+          <td>${d.perangkat}</td>
+          <td>
+            <button class="blokir-btn" onclick="blokirPengguna('${d.androidId}')">Blokir Android</button>
+            <button class="blokir-btn" onclick="blokirUserAgent(\`${d.userAgent}\`)">Blokir UA</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    });
+
+    // Tampilkan daftar UA diblokir
+    const blokirBody = document.getElementById("blokirBody");
+    onValue(ref(db, "terblokirUserAgent/"), snap => {
+      const data = snap.val();
+      blokirBody.innerHTML = "";
 
       if (data) {
-        const rows = Object.values(data).reverse();
-        onlineCount.textContent = rows.length;
-
-        rows.forEach((item) => {
+        Object.keys(data).forEach(encoded => {
           const row = document.createElement("tr");
           row.innerHTML = `
-            <td>${item.waktu}</td>
-            <td>${item.userAgent}</td>
-            <td><a href="${item.url}" target="_blank">${item.url}</a></td>
+            <td>${encoded}</td>
+            <td><button class="blokir-btn" onclick="bukaBlokir('${encoded}')">Buka Blokir</button></td>
           `;
-          tableBody.appendChild(row);
+          blokirBody.appendChild(row);
         });
       } else {
-        onlineCount.textContent = "0";
-        tableBody.innerHTML = `<tr><td colspan="3">Belum ada data pengguna.</td></tr>`;
+        blokirBody.innerHTML = `<tr><td colspan="2">Tidak ada blokiran.</td></tr>`;
       }
     });
+
   </script>
 </body>
 </html>
