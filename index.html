@@ -136,6 +136,11 @@
       return;
     }
 
+    // Simpan ke localStorage
+    localStorage.setItem("ujianLink", link);
+    localStorage.setItem("guruPengawas", namaGuru);
+
+    // Kalau link admin, langsung ke admin.html
     if (link === "admin123#") {
       window.location.href = "admin.html";
       return;
@@ -145,8 +150,6 @@
     if (window.AndroidInterface && typeof AndroidInterface.getAndroidId === "function") {
       androidId = AndroidInterface.getAndroidId();
     }
-
-    localStorage.setItem("ujianLink", link);
 
     const userId = "user_" + new Date().getTime();
     const userRef = ref(database, 'onlineUsers/' + userId);
