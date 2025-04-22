@@ -85,13 +85,13 @@
   </style>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
-<body>
+<body onload="document.getElementById('linkInput').focus();">
 
 <div class="container">
   <h2>Masukkan IP address/alamat server</h2>
   <input type="text" id="linkInput" placeholder="Masukkan alamat server...">
+  <input type="text" id="namaGuru" placeholder="Masukkan nama guru pengawas...">
 
-  <!-- 3 tombol -->
   <button id="goToExambroBtn">LANJUTKAN</button>
   <button id="startScanBtn">SCAN QR CODE</button>
   <button id="galleryScanBtn">SCAN QR DARI GALERI</button>
@@ -126,28 +126,47 @@
 
   function goToExambro() {
     const link = document.getElementById("linkInput").value.trim();
+    const namaGuru = document.getElementById("namaGuru").value.trim();
+    const btn = document.getElementById("goToExambroBtn");
+    btn.disabled = true;
 
-    if (link === "") {
-      alert("Masukkan link terlebih dahulu!");
-    } else if (link === "admin123#") {
-      window.location.href = "admin.html";
-    } else {
-      localStorage.setItem("ujianLink", link);
-
-      const userId = "user_" + new Date().getTime();
-      const userRef = ref(database, 'onlineUsers/' + userId);
-
-      set(userRef, {
-        link: link,
-        status: 'online',
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        waktu: new Date().toLocaleString(),
-        url: link
-      });
-
-      window.location.href = "ujian.html";
+    if (link === "" || namaGuru === "") {
+      alert("Masukkan link dan nama guru pengawas terlebih dahulu!");
+      btn.disabled = false;
+      return;
     }
+
+    if (link === "admin123#") {
+      window.location.href = "admin.html";
+      return;
+    }
+
+    let androidId = "unknown";
+    if (window.AndroidInterface && typeof AndroidInterface.getAndroidId === "function") {
+      androidId = AndroidInterface.getAndroidId();
+    }
+
+    localStorage.setItem("ujianLink", link);
+
+    const userId = "user_" + new Date().getTime();
+    const userRef = ref(database, 'onlineUsers/' + userId);
+
+    set(userRef, {
+      androidId: androidId,
+      link: link,
+      guruPengawas: namaGuru,
+      status: 'online',
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      waktu: new Date().toLocaleString(),
+      url: link
+    }).then(() => {
+      window.location.href = "ujian.html";
+    }).catch(err => {
+      alert("Gagal menyimpan data. Silakan coba lagi.");
+      console.error(err);
+      btn.disabled = false;
+    });
   }
 
   function requestFullscreen() {
