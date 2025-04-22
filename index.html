@@ -136,11 +136,6 @@
       return;
     }
 
-    // Simpan ke localStorage
-    localStorage.setItem("ujianLink", link);
-    localStorage.setItem("guruPengawas", namaGuru);
-
-    // Kalau link admin, langsung ke admin.html
     if (link === "admin123#") {
       window.location.href = "admin.html";
       return;
