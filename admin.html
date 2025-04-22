@@ -56,7 +56,6 @@
     }
   </style>
 
-  <!-- UAParser.js -->
   <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0.7.28/dist/ua-parser.min.js"></script>
 </head>
 <body>
@@ -69,6 +68,7 @@
     <thead>
       <tr>
         <th>Waktu</th>
+        <th>Guru</th>
         <th>Browser</th>
         <th>Link Ujian</th>
         <th>Android ID</th>
@@ -77,7 +77,7 @@
       </tr>
     </thead>
     <tbody id="tableBody">
-      <tr><td colspan="6">Memuat data...</td></tr>
+      <tr><td colspan="7">Memuat data...</td></tr>
     </tbody>
   </table>
 
@@ -124,13 +124,15 @@
       throw new Error("UA diblokir");
     }
 
-    // Pakai UAParser setelah tersedia
+    // Gunakan UAParser
     const parser = new UAParser();
     const result = parser.setUA(userAgent).getResult();
     const deviceName = `${result.device.model || result.os.name || "Unknown OS"} - ${result.browser.name || "Unknown Browser"}`;
 
     const userId = "user_" + Math.random().toString(36).substring(2, 10);
     const androidId = localStorage.getItem("androidId") || "UNKNOWN";
+    const guru = localStorage.getItem("guruPengawas") || "Tidak diketahui";
+
     const userRef = ref(db, "pengguna/" + userId);
 
     set(userRef, {
@@ -138,7 +140,8 @@
       userAgent,
       perangkat: deviceName,
       url: location.href,
-      androidId
+      androidId,
+      guru
     });
 
     onDisconnect(userRef).remove();
@@ -180,6 +183,7 @@
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${d.waktu}</td>
+          <td>${d.guru || "Tidak diketahui"}</td>
           <td>${d.userAgent}</td>
           <td><a href="${d.url}" target="_blank">${d.url}</a></td>
           <td>${d.androidId}</td>
