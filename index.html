@@ -1,43 +1,59 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Masukkan Link Ujian</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Arial', sans-serif;
-      height: 100vh;
-      overflow: hidden;
-      background: #f4f5f7;
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
-    .container {
-      width: 100%;
-      max-width: 400px;
-      background: #ffffff;
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #fdfbfb, #ebedee);
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .box {
+      background: white;
+      padding: 30px 25px;
       border-radius: 15px;
-      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
-      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 420px;
       text-align: center;
-      margin: auto;
-      position: relative;
-      top: 50%;
-      transform: translateY(-50%);
+      animation: fadeInUp 1s ease-in-out;
     }
 
     h2 {
-      font-size: 18px;
-      margin-bottom: 20px;
+      margin-top: 10px;
+    }
+
+    .warning {
+      color: red;
+      font-weight: bold;
+      animation: fadeInUp 1.3s ease forwards;
     }
 
     input[type="text"] {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: 2px solid #4CAF50;
+      padding: 14px;
+      margin: 15px 0;
+      border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 16px;
       transition: box-shadow 0.3s ease;
@@ -45,190 +61,105 @@
 
     input[type="text"]:focus {
       outline: none;
-      box-shadow: 0 0 5px #4CAF50;
-      border-color: #4CAF50;
+      box-shadow: 0 0 5px #28a745;
+      border-color: #28a745;
     }
 
     button {
       width: 100%;
-      padding: 12px;
-      background-color: #4CAF50;
+      padding: 14px;
+      background-color: #28a745;
       color: white;
       border: none;
       border-radius: 8px;
       font-size: 16px;
-      margin: 10px 0;
+      font-weight: bold;
+      transition: background 0.3s ease, transform 0.2s ease;
       cursor: pointer;
-      transition: background 0.3s ease;
     }
 
     button:hover {
-      background-color: #45a049;
+      background-color: #218838;
+      transform: scale(1.03);
     }
 
-    .instructions {
-      margin-top: 20px;
+    footer {
+      position: absolute;
+      bottom: 10px;
+      text-align: center;
       font-size: 14px;
-      text-align: left;
-      background: #f9f9f9;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-    }
-
-    #qr-reader {
-      width: 100%;
-      max-width: 400px;
-      margin: 10px auto;
-      display: none;
+      color: #555;
+      opacity: 0;
+      animation: fadeInUp 1.6s ease forwards;
+      animation-delay: 0.5s;
     }
   </style>
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
-<body onload="document.getElementById('linkInput').focus();">
-
-<div class="container">
-  <h2>Masukkan IP address/alamat server</h2>
-  <input type="text" id="linkInput" placeholder="Masukkan alamat server...">
-
-  <button id="goToExambroBtn">LANJUTKAN</button>
-  <button id="startScanBtn">SCAN QR CODE</button>
-  <button id="galleryScanBtn">SCAN QR DARI GALERI</button>
-
-  <div id="qr-reader"></div>
-
-  <div class="instructions">
-    <h3>Petunjuk:</h3>
-    <ol>
-      <li>Kontol bikin nya susah anjg salah promt dikit chatgpt langsung dungu</li>
-      <li>Banyak bacot Blokk</li>
-    </ol>
+<body>
+  <div class="box">
+    <h2 class="warning">Peringatan!!!</h2>
+    <h2 class="warning">Jangan lupa setelah masuk, klik icon plus agar memasuki mode fullscreen</h2>
+    <h2 class="warning">Hati-hati sama guru killer, ketauan mampus lu</h2>
+    <h2>Masukkan Link Ujian</h2>
+    <input type="text" id="linkInput" placeholder="https://docs.google.com/...">
+    <button id="goToExambroBtn">Masuk</button>
+    <h2 class="warning">Menuju Indonesia (c) Emas</h2>
   </div>
-</div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+  <footer>© 2025 irsad_hytam</footer>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAs7bvH4MMcIimDVY5cNuSwoaeNTgWahx4",
-    authDomain: "exambro-4b098.firebaseapp.com",
-    databaseURL: "https://exambro-4b098-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "exambro-4b098",
-    storageBucket: "exambro-4b098.appspot.com",
-    messagingSenderId: "626797016044",
-    appId: "1:626797016044:web:2dd7f66db290464e6f86c9"
-  };
+  <script type="module">
+    // Mengimpor Firebase modul
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
+    // Konfigurasi Firebase kamu
+    const firebaseConfig = {
+      apiKey: "AIzaSyAs7bvH4MMcIimDVY5cNuSwoaeNTgWahx4",
+      authDomain: "exambro-4b098.firebaseapp.com",
+      databaseURL: "https://exambro-4b098-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "exambro-4b098",
+      storageBucket: "exambro-4b098.firebasestorage.app",
+      messagingSenderId: "626797016044",
+      appId: "1:626797016044:web:2dd7f66db290464e6f86c9"
+    };
 
-  function goToExambro() {
-    const link = document.getElementById("linkInput").value.trim();
-    const namaGuru = document.getElementById("namaGuru").value.trim();
-    const btn = document.getElementById("goToExambroBtn");
-    btn.disabled = true;
+    // Inisialisasi Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
-    if (link === "" || namaGuru === "") {
-      alert("Masukkan link dan nama guru pengawas terlebih dahulu!");
-      btn.disabled = false;
-      return;
-    }
+    // Fungsi untuk menangani pengiriman link ujian
+    function goToExambro() {
+  const link = document.getElementById("linkInput").value.trim();
 
-    if (link === "admin123#") {
-      window.location.href = "admin.html";
-      return;
-    }
+  if (link === "") {
+    alert("Masukkan link terlebih dahulu!");
+  } else if (link === "admin123#") {
+    window.location.href = "admin.html";
+  } else {
+    // Menyimpan link ke localStorage
+    localStorage.setItem("ujianLink", link);
 
-    let androidId = "unknown";
-    if (window.AndroidInterface && typeof AndroidInterface.getAndroidId === "function") {
-      androidId = AndroidInterface.getAndroidId();
-    }
-
-    const userId = "user_" + new Date().getTime();
+    // Menyimpan status pengguna yang online ke Firebase
+    const userId = "user_" + new Date().getTime();  // Unik ID berdasarkan waktu
     const userRef = ref(database, 'onlineUsers/' + userId);
 
     set(userRef, {
-      androidId: androidId,
       link: link,
-      guruPengawas: namaGuru,
       status: 'online',
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
       waktu: new Date().toLocaleString(),
       url: link
-    }).then(() => {
-      window.location.href = "ujian.html";
-    }).catch(err => {
-      alert("Gagal menyimpan data. Silakan coba lagi.");
-      console.error(err);
-      btn.disabled = false;
     });
+
+    // Arahkan ke halaman ujian
+    window.location.href = "ujian.html";
   }
+}
 
-  function requestFullscreen() {
-    const elem = document.documentElement;
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen().catch(() => {});
-    } else if (elem.webkitRequestFullscreen) {
-      elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) {
-      elem.msRequestFullscreen();
-    }
-  }
-
-  document.querySelectorAll("button").forEach(btn => {
-    btn.addEventListener("click", requestFullscreen);
-  });
-
-  document.getElementById("goToExambroBtn").addEventListener("click", goToExambro);
-
-  document.getElementById("startScanBtn").addEventListener("click", function () {
-    const qrReader = new Html5Qrcode("qr-reader");
-    document.getElementById("qr-reader").style.display = "block";
-
-    qrReader.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
-      qrCodeMessage => {
-        document.getElementById("linkInput").value = qrCodeMessage;
-        qrReader.stop().then(() => {
-          document.getElementById("qr-reader").style.display = "none";
-          goToExambro();
-        });
-      },
-      errorMessage => {
-        console.warn("Scan error:", errorMessage);
-      }
-    ).catch(err => {
-      console.error("Camera start error:", err);
-    });
-  });
-
-  document.getElementById("galleryScanBtn").addEventListener("click", () => {
-    const qrReader = new Html5Qrcode("qr-reader");
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.style.display = "none";
-    document.body.appendChild(input);
-
-    input.onchange = () => {
-      if (input.files.length === 0) return;
-      const imageFile = input.files[0];
-      qrReader.scanFile(imageFile, true)
-        .then(qrCodeMessage => {
-          document.getElementById("linkInput").value = qrCodeMessage;
-          goToExambro();
-        })
-        .catch(err => {
-          alert("Gagal membaca QR dari gambar.");
-          console.error(err);
-        });
-    };
-
-    input.click();
-  });
-</script>
+    // Menambahkan event listener untuk tombol "Masuk"
+    document.getElementById("goToExambroBtn").addEventListener("click", goToExambro);
+  </script>
 </body>
 </html>
