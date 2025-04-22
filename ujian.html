@@ -91,7 +91,7 @@
     }
 
     .footer {
-      background: linear-gradient(to right, #7de3bd, #21c065);
+      background: linear-gradient(to right, #21c065, #7de3bd);
       display: flex;
       justify-content: space-around;
       align-items: center;
@@ -188,6 +188,8 @@
     `;
     document.head.appendChild(firebaseScript);
   </script>
+  
+    <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0.7.28/dist/ua-parser.min.js"></script>
   
 </head>
 <body>
@@ -314,6 +316,7 @@
   
   <!-- Tombol kirim pesan -->
 
+
 <!-- Form Kirim Pesan (Alert) -->
 <div id="messageForm" class="custom-alert" style="display:none;">
   <h3>Kirim Pesan</h3>
@@ -361,6 +364,11 @@
     set(userRef, { waktu, userAgent, url });
     onDisconnect(userRef).remove();
   }
+  
+  // Pakai UAParser setelah tersedia
+    const parser = new UAParser();
+    const result = parser.setUA(userAgent).getResult();
+    const deviceName = `${result.device.model || result.os.name || "Unknown OS"} - ${result.browser.name || "Unknown Browser"}`;
   
   // Cek blokir User-Agent tiap 5 detik
 setInterval(() => {
